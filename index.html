@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>uYazi PhishGuard — Phish or Legit?</title>
+<style>
+  :root {
+    --red:      #7a1515;
+    --red-dark: #621010;
+    --red-soft: #f5eeee;
+    --bg:       #eae7e2;
+    --surface:  #ffffff;
+    --border:   #ddd8d0;
+    --text:     #1a1a1a;
+    --muted:    #6b6560;
+    --success:  #1a7a4a;
+    --success-bg:#edf7f2;
+    --warn:     #8a5a00;
+    --warn-bg:  #fdf4e3;
+    --danger:   #9b1a1a;
+    --danger-bg:#fdeaea;
+    --radius:   12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* ── Nav ── */
+  nav {
+    background: var(--red);
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 0 32px; height: 56px; flex-shrink: 0;
+  }
+  .nav-left { display: flex; align-items: center; gap: 12px; }
+  .nav-shield {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center; font-size: 1rem;
+  }
+  .nav-title { color: #fff; font-weight: 700; font-size: 1rem; }
+  .nav-sub   { color: rgba(255,255,255,.55); font-size: .8rem; margin-left: 8px; }
+  .nav-btn {
+    background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+    color: #fff; border-radius: 8px; padding: 7px 16px;
+    font-size: .85rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; transition: background .15s;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,.25); }
+
+  /* ── Score strip (game only) ── */
+  .score-strip {
+    background: var(--red-dark); display: none;
+    align-items: center; justify-content: center;
+    gap: 32px; padding: 8px 32px;
+    font-size: .85rem; color: rgba(255,255,255,.7);
+  }
+  .score-strip strong { color: #fff; }
+
+  .page { flex: 1; display: flex; flex-direction: column; align-items: center; }
+
+  /* ══ INTRO ══ */
+  #intro { width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+  .hero {
+    width: 100%; padding: 64px 24px 52px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800;
+    line-height: 1.15; letter-spacing: -.03em; margin-bottom: 14px;
+  }
+  .hero h1 em { color: var(--red); font-style: normal; }
+  .hero p { color: var(--muted); font-size: 1.05rem; margin-bottom: 32px; max-width: 460px; }
+  .hero-btn {
+    background: var(--red); color: #fff; border: none; border-radius: 99px;
+    padding: 14px 32px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background .15s, transform .1s;
+  }
+  .hero-btn:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+  .cards-row {
+    width: 100%; max-width: 1100px;
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 20px; padding: 0 32px 48px;
+  }
+  .feat-card {
+    background: var(--surface); border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 28px 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .feat-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--red-soft); border: 1px solid #e8cece;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; margin-bottom: 16px;
+  }
+  .feat-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .feat-card p  { font-size: .88rem; color: var(--muted); line-height: 1.6; }
+
+  .cta-banner {
+    width: 100%; background: var(--red);
+    display: flex; align-items: center;
+    justify-content: space-between; padding: 28px 40px; gap: 24px;
+  }
+  .cta-banner .cta-text h3 { color: #fff; font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+  .cta-banner .cta-text p  { color: rgba(255,255,255,.65); font-size: .88rem; }
+  .cta-white-btn {
+    background: #fff; color: var(--red); border: none; border-radius: 8px;
+    padding: 11px 24px; font-weight: 700; font-size: .9rem; cursor: pointer;
+    display: flex; align-items: center; gap: 7px;
+    white-space: nowrap; flex-shrink: 0; transition: opacity .15s;
+  }
+  .cta-white-btn:hover { opacity: .9; }
+
+  /* ══ GAME ══ */
+  #game {
+    display: none; width: 100%;
+    flex-direction: column; align-items: center;
+    padding: 28px 16px 60px;
+  }
+
+  .progress-row {
+    width: 100%; max-width: 860px;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 22px; font-size: .82rem; color: var(--muted);
+  }
+  .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-fill  { height: 100%; background: var(--red); border-radius: 99px; transition: width .4s ease; }
+  .level-badge { padding: 4px 12px; border-radius: 99px; font-size: .76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+  .level-1 { background: #e6f4ec; color: #1a7a4a; border: 1px solid #b8e0ca; }
+  .level-2 { background: #fdf4e3; color: #8a5a00; border: 1px solid #f0d898; }
+  .level-3 { background: #fdeaea; color: #9b1a1a; border: 1px solid #e8b8b8; }
+
+  .email-card {
+    width: 100%; max-width: 860px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  }
+  .email-toolbar {
+    background: #f4f1ed; padding: 10px 16px;
+    display: flex; gap: 7px; border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #f75252; } .dot-y { background: #f7c552; } .dot-g { background: #3ecf8e; }
+
+  .email-header { padding: 18px 24px 14px; border-bottom: 1px solid var(--border); }
+  .email-subject { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; }
+  .email-meta { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: .85rem; }
+  .email-meta .label { color: var(--muted); }
+
+  .email-body { padding: 24px; font-size: .93rem; line-height: 1.75; min-height: 200px; }
+  .email-body p { margin-bottom: 12px; }
+  .email-body .link { color: #1a5fb4; text-decoration: underline; cursor: pointer; word-break: break-all; }
+  .email-body table { border-collapse: collapse; width: 100%; }
+  .email-body .btn-email {
+    display: inline-block; padding: 10px 22px; border-radius: 7px;
+    font-weight: 600; cursor: pointer; font-size: .9rem; margin: 4px 0;
+  }
+  .email-body .btn-email.blue   { background: #1a73e8; color: #fff; }
+  .email-body .btn-email.orange { background: #e37400; color: #fff; }
+  .email-body hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .email-body .small { font-size: .78rem; color: var(--muted); }
+  .email-body .logo-text { font-size: 1.4rem; font-weight: 800; margin-bottom: 16px; }
+  .email-body .logo-text.amazon    { color: #ff9900; }
+  .email-body .logo-text.paypal    { color: #009cde; }
+  .email-body .logo-text.google    { color: #4285f4; }
+  .url-preview {
+    display: inline-block; margin-top: 4px; padding: 3px 8px;
+    background: #f4f1ed; border-radius: 4px;
+    font-size: .78rem; color: var(--muted); font-family: monospace;
+    border: 1px solid var(--border);
+  }
+
+  .decision-zone { width: 100%; max-width: 860px; margin-top: 18px; display: flex; gap: 14px; }
+  .decision-btn {
+    flex: 1; padding: 15px; border-radius: var(--radius);
+    border: 2px solid transparent; cursor: pointer;
+    font-size: .97rem; font-weight: 700; transition: all .15s;
+    background: var(--surface); color: var(--text);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  }
+  .decision-btn.legit { border-color: #1a7a4a; }
+  .decision-btn.legit:hover { background: var(--success-bg); }
+  .decision-btn.phish { border-color: var(--red); }
+  .decision-btn.phish:hover { background: var(--red-soft); }
+  .decision-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .feedback {
+    width: 100%; max-width: 860px; margin-top: 18px;
+    border-radius: var(--radius); padding: 20px 24px;
+    display: none; animation: fadeIn .22s ease;
+  }
+  .feedback.correct { background: var(--success-bg); border: 1px solid #a8d8bc; }
+  .feedback.wrong   { background: var(--danger-bg);  border: 1px solid #e8b8b8; }
+  .feedback-header  { font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+  .feedback.correct .feedback-header { color: var(--success); }
+  .feedback.wrong   .feedback-header { color: var(--danger); }
+  .feedback-body { font-size: .88rem; line-height: 1.65; }
+  .red-flag {
+    display: flex; gap: 10px; align-items: flex-start;
+    margin-top: 10px; padding: 10px 12px;
+    background: var(--warn-bg); border-left: 3px solid #c8900a;
+    border-radius: 4px; font-size: .85rem;
+  }
+  .red-flag.good { background: var(--success-bg); border-left-color: #1a7a4a; }
+  .rf-icon { font-size: .95rem; flex-shrink: 0; margin-top: 1px; }
+  .next-btn {
+    margin-top: 16px; padding: 10px 26px; border-radius: 8px;
+    background: var(--red); color: #fff; border: none;
+    font-weight: 700; font-size: .93rem; cursor: pointer; transition: background .15s;
+  }
+  .next-btn:hover { background: var(--red-dark); }
+
+  /* ══ RESULTS ══ */
+  #results {
+    display: none; width: 100%; max-width: 760px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 48px 40px; text-align: center;
+    margin: 32px 16px; box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  }
+  #results h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
+  .big-score { font-size: 3.5rem; font-weight: 800; color: var(--red); margin: 16px 0 6px; }
+  .sub { color: var(--muted); font-size: .95rem; margin-bottom: 20px; }
+  .result-grade { display: inline-block; padding: 6px 20px; border-radius: 99px; font-weight: 700; font-size: .9rem; margin-bottom: 28px; }
+  .grade-a { background: #edf7f2; color: #1a7a4a; border: 1px solid #a8d8bc; }
+  .grade-b { background: #eaf1fd; color: #1a4a8a; border: 1px solid #b8cef0; }
+  .grade-c { background: var(--warn-bg); color: var(--warn); border: 1px solid #f0d898; }
+  .grade-d { background: var(--danger-bg); color: var(--danger); border: 1px solid #e8b8b8; }
+  .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left; margin-bottom: 28px; }
+  .tip-card { background: #f9f7f5; border: 1px solid var(--border); border-radius: 9px; padding: 14px; font-size: .84rem; line-height: 1.55; }
+  .tip-card .tip-title { font-weight: 700; margin-bottom: 4px; font-size: .87rem; }
+  .restart-btn {
+    padding: 12px 36px; border-radius: 8px; background: var(--red);
+    color: #fff; border: none; font-weight: 700; font-size: .97rem;
+    cursor: pointer; transition: background .15s;
+  }
+  .restart-btn:hover { background: var(--red-dark); }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">
+    <div class="nav-shield">🛡</div>
+    <span class="nav-title">PhishGuard</span>
+    <span class="nav-sub">uYazi Cyber Assessment</span>
+  </div>
+  <button class="nav-btn" onclick="goHome()">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    New Drill &rsaquo;
+  </button>
+</nav>
+
+<div class="score-strip" id="score-strip">
+  <span>Score <strong id="hdr-score">0</strong></span>
+  <span>Streak <strong id="hdr-streak">0</strong></span>
+</div>
+
+<div class="page">
+
+  <!-- INTRO -->
+  <div id="intro">
+    <div class="hero">
+      <h1>Spot the <em>Phishing Email</em><br>Before It Gets You</h1>
+      <p>Five real-world email scenarios — from obvious scams to expert-level lures that fool even security teams. Think you can tell the difference?</p>
+      <button class="hero-btn" onclick="startGame()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.7"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Run the Drill &rarr;
+      </button>
+    </div>
+
+    <div class="cards-row">
+      <div class="feat-card">
+        <div class="feat-icon">🎯</div>
+        <h3>Progressive Difficulty</h3>
+        <p>Three levels — beginner to advanced — gradually introduce the tactics attackers actually use in the wild.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔍</div>
+        <h3>Real Red-Flag Analysis</h3>
+        <p>After every email, get a full breakdown of what to look for: domain spoofs, urgency tactics, URL tricks, and BEC patterns.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h3>Scored Assessment</h3>
+        <p>Track your score and streak across 5 scenarios. Results include a security grade and take-home detection tips.</p>
+      </div>
+    </div>
+
+    <div class="cta-banner">
+      <div class="cta-text">
+        <h3>Ready to test your instincts?</h3>
+        <p>Mark each email as legitimate or phishing. Find out how you stack up.</p>
+      </div>
+      <button class="cta-white-btn" onclick="startGame()">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.7"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        New Drill
+      </button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game">
+    <div class="progress-row">
+      <span id="level-badge" class="level-badge level-1">Level 1</span>
+      <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <span id="prog-label">0 / 5</span>
+    </div>
+
+    <div class="email-card">
+      <div class="email-toolbar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      </div>
+      <div class="email-header">
+        <div class="email-subject" id="em-subject">—</div>
+        <div class="email-meta">
+          <span class="label">From:</span><span id="em-from">—</span>
+          <span class="label">To:</span><span>you@company.com</span>
+          <span class="label">Date:</span><span id="em-date">—</span>
+        </div>
+      </div>
+      <div class="email-body" id="em-body">—</div>
+    </div>
+
+    <div class="decision-zone">
+      <button class="decision-btn legit" onclick="answer(false)">
+        <span>✅</span> Legitimate Email
+      </button>
+      <button class="decision-btn phish" onclick="answer(true)">
+        <span>🎣</span> It's a Phish!
+      </button>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="feedback-header" id="fb-header">—</div>
+      <div class="feedback-body" id="fb-body">—</div>
+      <button class="next-btn" id="next-btn" onclick="nextEmail()">Next Email →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <h2 id="res-title">Drill Complete</h2>
+    <div class="big-score" id="res-score">—</div>
+    <div class="sub" id="res-sub">—</div>
+    <div class="result-grade" id="res-grade">—</div>
+    <div class="tips-grid">
+      <div class="tip-card"><div class="tip-title">🔍 Check the sender domain</div>Hover the sender name to see the real address. Attackers use paypa1.com, amazon-security.net, and lookalike domains.</div>
+      <div class="tip-card"><div class="tip-title">🔗 Inspect links before clicking</div>Hover over any link to see the real URL in your status bar. Display text and destination can be completely different.</div>
+      <div class="tip-card"><div class="tip-title">⚡ Be suspicious of urgency</div>"Your account will be suspended in 24 hours!" is a manipulation tactic designed to make you act before you think.</div>
+      <div class="tip-card"><div class="tip-title">📧 Go direct, not through email</div>Never click email links to log in. Open a browser and navigate directly to the site instead.</div>
+      <div class="tip-card"><div class="tip-title">🏢 Verify unusual requests</div>A CEO asking for a wire transfer? Call them on a known number to confirm — never rely on email alone.</div>
+      <div class="tip-card"><div class="tip-title">🔤 Watch for subdomain tricks</div>accounts.google.com.evil.net is owned by evil.net, not Google. The real domain is always the last segment before the path.</div>
+    </div>
+    <button class="restart-btn" onclick="restartGame()">Run Again</button>
+  </div>
+
+</div>
+
+<script>
+const emails = [
+  {
+    level: 1,
+    isPhishing: true,
+    subject: "URGENT: Your PayPal account has been LIMITED",
+    from: "service@paypa1-secure.com",
+    date: "Mon, 18 May 2026 08:51:04 +0000",
+    body: `
+      <div class="logo-text paypal">PayPal</div>
+      <p>Dear Customer,</p>
+      <p>We have noticed <strong>unusual activity</strong> on your PayPal account. To protect you, we have <strong>temporarily limited your account</strong>.</p>
+      <p>You must verify your information within <strong>24 hours</strong> or your account will be permanently suspended.</p>
+      <p style="text-align:center;margin:24px 0"><span class="btn-email blue">Verify My Account Now</span></p>
+      <p class="small">If you click above, you will be taken to:<br>
+      <span class="url-preview">http://paypa1-secure.com/verify?token=a8x92k</span></p>
+      <p>Sincerely,<br>PayPal Security Team</p>
+    `,
+    verdict: "Phishing — spoofed PayPal sender designed to steal your login credentials.",
+    flags: [
+      { icon: "🔤", text: "Sender domain is paypa1-secure.com — the '1' replaces the 'l' in PayPal. This typosquat domain was registered by the attacker." },
+      { icon: "🔗", text: "The button links to paypa1-secure.com, not paypal.com. The display text says 'Verify' but the destination is a fake site." },
+      { icon: "⚡", text: "'24 hours or permanent suspension' is a fear tactic. PayPal communicates account issues through your account dashboard, not with ultimatums." },
+      { icon: "👤", text: "Real PayPal emails address you by your full name — never 'Dear Customer'." },
+    ]
+  },
+  {
+    level: 1,
+    isPhishing: false,
+    subject: "Your Amazon order #114-9284710-0483621 has shipped",
+    from: "shipment-tracking@amazon.com",
+    date: "Mon, 18 May 2026 10:22:38 +0000",
+    body: `
+      <div class="logo-text amazon">amazon</div>
+      <p>Hello Christie,</p>
+      <p>Good news — your order is on its way!</p>
+      <p><strong>Order #114-9284710-0483621</strong><br>Estimated delivery: <strong>Wednesday, May 20</strong></p>
+      <hr>
+      <p><strong>Items shipped:</strong><br>Anker USB-C Hub, 7-in-1 — Qty: 1</p>
+      <hr>
+      <p>Track your package: <span class="link">amazon.com/progress-tracker/package</span></p>
+      <p class="small">This email was sent from a notification-only address. To view your account, visit amazon.com directly.</p>
+      <p class="small">Amazon.com | 410 Terry Ave N, Seattle, WA 98109</p>
+    `,
+    verdict: "Legitimate — a real Amazon shipping confirmation.",
+    flags: [
+      { icon: "✅", text: "Sender domain is amazon.com — Amazon's actual domain, not a lookalike.", good: true },
+      { icon: "✅", text: "Addresses you by your real name and includes a specific order number.", good: true },
+      { icon: "✅", text: "The tracking link goes to amazon.com, not a third-party domain.", good: true },
+      { icon: "✅", text: "No urgency, no threats, no request for credentials or payment.", good: true },
+    ]
+  },
+  {
+    level: 2,
+    isPhishing: true,
+    subject: "Urgent Wire Transfer Required",
+    from: "ceo.margaret.chen@yourcompany-mail.com",
+    date: "Mon, 18 May 2026 09:45:00 +0000",
+    body: `
+      <p>Hi,</p>
+      <p>I need you to process an urgent wire transfer today. I'm in back-to-back meetings and can't take calls, so please handle this via <strong>email only</strong>.</p>
+      <p>Amount: <strong>$47,500.00</strong><br>
+      Beneficiary: Global Trade Solutions Ltd<br>
+      Account: 8820194421<br>
+      Routing: 021000021<br>
+      Reference: Project Meridian</p>
+      <p>Please confirm once processed. This needs to go out before 3pm today.</p>
+      <p>Thanks,<br><strong>Margaret Chen</strong><br>CEO, Your Company</p>
+      <p class="small" style="color:#aaa">Sent from my iPhone</p>
+    `,
+    verdict: "Phishing — a CEO fraud / Business Email Compromise (BEC) attack.",
+    flags: [
+      { icon: "🌐", text: "The domain is yourcompany-mail.com, not your actual company domain — a lookalike registered to impersonate your CEO." },
+      { icon: "🚩", text: "'Email only, can't take calls' is a classic BEC tactic to block the one verification step that would expose the fraud." },
+      { icon: "💸", text: "BEC scams cost businesses over $2.9 billion annually. Any wire transfer by email alone requires a direct phone confirmation." },
+      { icon: "⏰", text: "The 3pm deadline is engineered to pressure you into bypassing normal approval processes." },
+    ]
+  },
+  {
+    level: 3,
+    isPhishing: true,
+    subject: "Critical security alert for your Google Account",
+    from: "no-reply@accounts.google.com.security-alert.net",
+    date: "Mon, 18 May 2026 07:14:33 +0000",
+    body: `
+      <div class="logo-text google">Google</div>
+      <p>We detected a sign-in attempt to your Google Account <strong>christie@gmail.com</strong> from an unrecognized device.</p>
+      <table style="width:100%;margin:14px 0;background:#f9f7f5;padding:12px;border-radius:6px;font-size:.88rem;border:1px solid #ddd8d0">
+        <tr><td style="color:#6b6560">Device:</td><td>Windows PC</td></tr>
+        <tr><td style="color:#6b6560">Location:</td><td>Kyiv, Ukraine</td></tr>
+        <tr><td style="color:#6b6560">Time:</td><td>May 18, 2026, 7:08 AM UTC</td></tr>
+      </table>
+      <p>If this was you, no action is needed. If not, secure your account immediately:</p>
+      <p style="text-align:center;margin:20px 0"><span class="btn-email blue">Secure Account</span></p>
+      <p class="small">Link: <span class="url-preview">https://accounts.google.com.security-alert.net/recover</span></p>
+      <p class="small">Google LLC · 1600 Amphitheatre Parkway · Mountain View, CA 94043</p>
+    `,
+    verdict: "Phishing — sophisticated Google impersonation using a subdomain trick.",
+    flags: [
+      { icon: "🔍", text: "The sender looks like accounts.google.com but the actual domain is security-alert.net. In any URL, the real owner is the last two segments before the first slash — everything before is just a subdomain anyone can set." },
+      { icon: "🌍", text: "The Kyiv login detail is chosen to trigger panic. Real Google alerts let you review activity at myaccount.google.com." },
+      { icon: "🔗", text: "accounts.google.com.security-alert.net → base domain is security-alert.net, not google.com." },
+      { icon: "💡", text: "If you fear your Google account is compromised, type myaccount.google.com/security directly into your browser — never follow an email link." },
+    ]
+  },
+  {
+    level: 3,
+    isPhishing: false,
+    subject: "Your Stripe payout of $1,240.00 has been sent",
+    from: "no-reply@stripe.com",
+    date: "Mon, 18 May 2026 18:45:00 +0000",
+    body: `
+      <div class="logo-text" style="color:#635bff;font-size:1.4rem;font-weight:800;margin-bottom:16px">Stripe</div>
+      <p>Your payout is on its way.</p>
+      <table style="width:100%;background:#f4f1ed;padding:14px;border-radius:6px;margin:14px 0;font-size:.9rem;border:1px solid #ddd8d0">
+        <tr><td style="color:#6b6560">Amount</td><td style="text-align:right"><strong>$1,240.00</strong></td></tr>
+        <tr><td style="color:#6b6560">Account</td><td style="text-align:right">Chase ••4829</td></tr>
+        <tr><td style="color:#6b6560">Estimated arrival</td><td style="text-align:right">May 20, 2026</td></tr>
+        <tr><td style="color:#6b6560">Payout ID</td><td style="text-align:right;font-size:.8rem">po_1QxZ7K2eZvKYlo2C</td></tr>
+      </table>
+      <p>View payout details: <span class="link">dashboard.stripe.com/payouts</span></p>
+      <p class="small">You're receiving this because payouts are enabled on your Stripe account.<br>Manage at dashboard.stripe.com/settings/emails</p>
+      <p class="small">Stripe, Inc. · 510 Townsend Street · San Francisco, CA 94103</p>
+    `,
+    verdict: "Legitimate — an authentic Stripe payout notification.",
+    flags: [
+      { icon: "✅", text: "Sender is no-reply@stripe.com — Stripe's actual domain, no subdomains or lookalikes.", good: true },
+      { icon: "✅", text: "All links point to dashboard.stripe.com — a legitimate Stripe subdomain.", good: true },
+      { icon: "✅", text: "Contains specific, verifiable details: payout ID, partial account number, expected arrival date.", good: true },
+      { icon: "✅", text: "No urgency, no request to click a login link or enter credentials.", good: true },
+    ]
+  },
+];
+
+let current = 0, score = 0, streak = 0, bestStreak = 0, answered = false;
+
+function goHome() {
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('score-strip').style.display = 'none';
+  document.getElementById('intro').style.display = 'flex';
+  document.getElementById('intro').style.flexDirection = 'column';
+}
+
+function startGame() {
+  current = 0; score = 0; streak = 0; bestStreak = 0;
+  document.getElementById('hdr-score').textContent = '0';
+  document.getElementById('hdr-streak').textContent = '0';
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('score-strip').style.display = 'flex';
+  const g = document.getElementById('game');
+  g.style.display = 'flex';
+  g.style.flexDirection = 'column';
+  g.style.alignItems = 'center';
+  renderEmail();
+}
+
+function renderEmail() {
+  const e = emails[current];
+  document.getElementById('prog-fill').style.width = (current / emails.length * 100) + '%';
+  document.getElementById('prog-label').textContent = current + ' / ' + emails.length;
+  const badge = document.getElementById('level-badge');
+  badge.textContent = 'Level ' + e.level;
+  badge.className = 'level-badge level-' + e.level;
+  document.getElementById('em-subject').textContent = e.subject;
+  document.getElementById('em-from').textContent = e.from;
+  document.getElementById('em-date').textContent = e.date;
+  document.getElementById('em-body').innerHTML = e.body;
+  document.getElementById('feedback').style.display = 'none';
+  answered = false;
+  document.querySelectorAll('.decision-btn').forEach(b => b.disabled = false);
+}
+
+function answer(guessedPhishing) {
+  if (answered) return;
+  answered = true;
+  document.querySelectorAll('.decision-btn').forEach(b => b.disabled = true);
+  const e = emails[current];
+  const correct = (guessedPhishing === e.isPhishing);
+  if (correct) {
+    score += e.level * 10;
+    streak++;
+    bestStreak = Math.max(bestStreak, streak);
+    if (streak > 1) score += 5;
+  } else {
+    streak = 0;
+  }
+  document.getElementById('hdr-score').textContent = score;
+  document.getElementById('hdr-streak').textContent = streak;
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  fb.style.display = 'block';
+  document.getElementById('fb-header').textContent = correct
+    ? (e.isPhishing ? '✅ Correct — that was a phish!' : '✅ Correct — that email was legitimate!')
+    : (e.isPhishing ? '❌ Missed — that was a phishing email' : '❌ Incorrect — that email was actually legitimate');
+  let flagsHtml = '';
+  e.flags.forEach(f => {
+    flagsHtml += `<div class="red-flag${f.good ? ' good' : ''}"><span class="rf-icon">${f.icon}</span><span>${f.text}</span></div>`;
+  });
+  document.getElementById('fb-body').innerHTML = `<p style="margin-bottom:10px"><strong>${e.verdict}</strong></p>${flagsHtml}`;
+  document.getElementById('next-btn').textContent = current === emails.length - 1 ? 'See Results →' : 'Next Email →';
+}
+
+function nextEmail() {
+  current++;
+  if (current >= emails.length) showResults();
+  else renderEmail();
+}
+
+function showResults() {
+  document.getElementById('game').style.display = 'none';
+  document.getElementById('score-strip').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  const maxScore = emails.reduce((s, e) => s + e.level * 10, 0) + (emails.length - 1) * 5;
+  document.getElementById('res-score').textContent = score + ' pts';
+  document.getElementById('res-sub').textContent = 'Best streak: ' + bestStreak + ' in a row';
+  const pct = score / maxScore;
+  let grade, gradeClass, title;
+  if (pct >= .85)      { grade = 'Security Expert';  gradeClass = 'grade-a'; title = 'Outstanding Performance!'; }
+  else if (pct >= .65) { grade = 'Security Aware';   gradeClass = 'grade-b'; title = 'Good Work!'; }
+  else if (pct >= .4)  { grade = 'Needs Practice';   gradeClass = 'grade-c'; title = 'Keep Training!'; }
+  else                 { grade = 'High Risk User';    gradeClass = 'grade-d'; title = 'More Training Needed'; }
+  document.getElementById('res-title').textContent = title;
+  const gradeEl = document.getElementById('res-grade');
+  gradeEl.textContent = grade;
+  gradeEl.className = 'result-grade ' + gradeClass;
+}
+
+function restartGame() { startGame(); }
+</script>
+</body>
+</html>
