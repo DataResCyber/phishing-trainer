@@ -250,6 +250,48 @@
   .restart-btn:hover { background: var(--red-dark); }
 
   @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+
+  /* ══ MOBILE ══ */
+  @media (max-width: 640px) {
+    nav { padding: 0 16px; }
+    .nav-sub { display: none; }
+
+    .hero { padding: 40px 20px 36px; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero p  { font-size: .95rem; }
+    .hero-btn { width: 100%; justify-content: center; padding: 15px 24px; font-size: 1rem; }
+
+    .cards-row { grid-template-columns: 1fr; padding: 0 16px 32px; gap: 14px; }
+
+    .cta-banner { flex-direction: column; align-items: flex-start; padding: 24px 20px; gap: 16px; }
+    .cta-white-btn { width: 100%; justify-content: center; }
+
+    #game { padding: 16px 12px 80px; }
+
+    .progress-row { gap: 8px; font-size: .78rem; margin-bottom: 14px; }
+
+    .email-card { border-radius: 10px; }
+    .email-toolbar { padding: 8px 12px; }
+    .email-header { padding: 14px 16px 12px; }
+    .email-subject { font-size: 1rem; }
+    .email-meta { font-size: .8rem; gap: 3px 8px; }
+    .email-body { padding: 16px; font-size: .88rem; min-height: unset; }
+    .email-body .btn-email { display: block; text-align: center; width: 100%; }
+    .url-preview { font-size: .72rem; word-break: break-all; }
+
+    .decision-zone { flex-direction: column; gap: 10px; margin-top: 14px; }
+    .decision-btn { padding: 16px; font-size: 1rem; }
+
+    .feedback { padding: 16px; margin-top: 14px; }
+    .red-flag { font-size: .83rem; }
+    .next-btn { width: 100%; text-align: center; padding: 14px; font-size: .95rem; }
+
+    #results { padding: 32px 20px; margin: 16px 12px; }
+    #results h2 { font-size: 1.4rem; }
+    .big-score { font-size: 2.8rem; }
+    .tips-grid { grid-template-columns: 1fr; }
+    .restart-btn { width: 100%; padding: 14px; }
+  }
 </style>
 </head>
 <body>
