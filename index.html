@@ -242,12 +242,41 @@
   .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left; margin-bottom: 28px; }
   .tip-card { background: #f9f7f5; border: 1px solid var(--border); border-radius: 9px; padding: 14px; font-size: .84rem; line-height: 1.55; }
   .tip-card .tip-title { font-weight: 700; margin-bottom: 4px; font-size: .87rem; }
+  .result-summary {
+    background: #f9f7f5; border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 24px;
+    text-align: left; margin-bottom: 28px; font-size: .93rem; line-height: 1.7;
+  }
+  .result-summary .sum-label {
+    font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted); margin-bottom: 8px;
+  }
+  .result-summary p { color: var(--text); }
+  .result-summary strong { color: var(--red); }
+  .result-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+  .btn-consult {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 24px; border-radius: 8px;
+    background: var(--red); color: #fff; border: none;
+    font-weight: 700; font-size: .97rem; cursor: pointer;
+    text-decoration: none; transition: background .15s;
+  }
+  .btn-consult:hover { background: var(--red-dark); }
+  .btn-home {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 24px; border-radius: 8px;
+    background: #fff; color: var(--red);
+    border: 2px solid var(--red); font-weight: 700; font-size: .97rem;
+    cursor: pointer; text-decoration: none; transition: background .15s;
+  }
+  .btn-home:hover { background: var(--red-soft); }
   .restart-btn {
-    padding: 12px 36px; border-radius: 8px; background: var(--red);
-    color: #fff; border: none; font-weight: 700; font-size: .97rem;
+    padding: 12px 36px; border-radius: 8px; background: #f9f7f5;
+    color: var(--muted); border: 1px solid var(--border);
+    font-weight: 600; font-size: .9rem;
     cursor: pointer; transition: background .15s;
   }
-  .restart-btn:hover { background: var(--red-dark); }
+  .restart-btn:hover { background: var(--border); color: var(--text); }
 
   @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
 
@@ -290,7 +319,7 @@
     #results h2 { font-size: 1.4rem; }
     .big-score { font-size: 2.8rem; }
     .tips-grid { grid-template-columns: 1fr; }
-    .restart-btn { width: 100%; padding: 14px; }
+    .btn-consult, .btn-home, .restart-btn { width: 100%; padding: 14px; }
   }
 </style>
 </head>
@@ -401,6 +430,12 @@
     <div class="big-score" id="res-score">—</div>
     <div class="sub" id="res-sub">—</div>
     <div class="result-grade" id="res-grade">—</div>
+
+    <div class="result-summary">
+      <div class="sum-label">Your Summary</div>
+      <p id="res-summary">—</p>
+    </div>
+
     <div class="tips-grid">
       <div class="tip-card"><div class="tip-title">🔍 Check the sender domain</div>Hover the sender name to see the real address. Attackers use paypa1.com, amazon-security.net, and lookalike domains.</div>
       <div class="tip-card"><div class="tip-title">🔗 Inspect links before clicking</div>Hover over any link to see the real URL in your status bar. Display text and destination can be completely different.</div>
@@ -409,7 +444,16 @@
       <div class="tip-card"><div class="tip-title">🏢 Verify unusual requests</div>A CEO asking for a wire transfer? Call them on a known number to confirm — never rely on email alone.</div>
       <div class="tip-card"><div class="tip-title">🔤 Watch for subdomain tricks</div>accounts.google.com.evil.net is owned by evil.net, not Google. The real domain is always the last segment before the path.</div>
     </div>
-    <button class="restart-btn" onclick="restartGame()">Run Again</button>
+
+    <div class="result-actions">
+      <a class="btn-consult" href="https://calendar.app.google/JfBMnNyijGnE4WUW8" target="_blank">
+        📅 Book a Free Consultation
+      </a>
+      <a class="btn-home" href="https://uyazi.co" target="_blank">
+        🏠 Visit uyazi.co
+      </a>
+      <button class="restart-btn" onclick="restartGame()">↺ Run Again</button>
+    </div>
   </div>
 
 </div>
@@ -548,7 +592,7 @@ const emails = [
   },
 ];
 
-let current = 0, score = 0, streak = 0, bestStreak = 0, answered = false;
+let current = 0, score = 0, streak = 0, bestStreak = 0, correctCount = 0, answered = false;
 
 function goHome() {
   document.getElementById('game').style.display = 'none';
@@ -559,7 +603,7 @@ function goHome() {
 }
 
 function startGame() {
-  current = 0; score = 0; streak = 0; bestStreak = 0;
+  current = 0; score = 0; streak = 0; bestStreak = 0; correctCount = 0;
   document.getElementById('hdr-score').textContent = '0';
   document.getElementById('hdr-streak').textContent = '0';
   document.getElementById('intro').style.display = 'none';
@@ -599,6 +643,7 @@ function answer(guessedPhishing) {
     streak++;
     bestStreak = Math.max(bestStreak, streak);
     if (streak > 1) score += 5;
+    correctCount++;
   } else {
     streak = 0;
   }
@@ -641,6 +686,19 @@ function showResults() {
   const gradeEl = document.getElementById('res-grade');
   gradeEl.textContent = grade;
   gradeEl.className = 'result-grade ' + gradeClass;
+
+  const total = emails.length;
+  let summary;
+  if (pct >= .85) {
+    summary = `You correctly identified <strong>${correctCount} out of ${total}</strong> emails — an excellent result. You clearly know what to look for. That said, phishing tactics evolve constantly, and even the most security-aware professionals stay vigilant. Keep that critical eye sharp, and consider sharing this drill with your team.`;
+  } else if (pct >= .65) {
+    summary = `You got <strong>${correctCount} out of ${total}</strong> correct — a solid showing. You caught the obvious ones and some of the trickier attacks too. A few slipped through, which is completely normal. Phishing emails are professionally crafted to deceive. Regular practice and a security awareness program for your team can close those gaps quickly.`;
+  } else if (pct >= .4) {
+    summary = `You identified <strong>${correctCount} out of ${total}</strong> emails correctly. Some of these were genuinely tricky, but there's real room to sharpen your defences. Attackers are counting on people being busy and trusting — awareness training is the single most effective way to reduce that risk for you and your organisation.`;
+  } else {
+    summary = `You got <strong>${correctCount} out of ${total}</strong> correct this time. Don't be discouraged — these attacks are designed by professionals to fool people, and they work. The important thing is that you're here, testing yourself. A focused security awareness session could dramatically reduce your organisation's exposure to phishing. Let's talk.`;
+  }
+  document.getElementById('res-summary').innerHTML = summary;
 }
 
 function restartGame() { startGame(); }
