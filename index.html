@@ -239,7 +239,13 @@
   .grade-b { background: #eaf1fd; color: #1a4a8a; border: 1px solid #b8cef0; }
   .grade-c { background: var(--warn-bg); color: var(--warn); border: 1px solid #f0d898; }
   .grade-d { background: var(--danger-bg); color: var(--danger); border: 1px solid #e8b8b8; }
-  .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left; margin-bottom: 28px; }
+  .tips-section { margin-top: 36px; text-align: left; }
+  .tips-heading {
+    font-size: 1rem; font-weight: 700; color: var(--text);
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tips-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left; }
   .tip-card { background: #f9f7f5; border: 1px solid var(--border); border-radius: 9px; padding: 14px; font-size: .84rem; line-height: 1.55; }
   .tip-card .tip-title { font-weight: 700; margin-bottom: 4px; font-size: .87rem; }
   .result-summary {
@@ -253,7 +259,7 @@
   }
   .result-summary p { color: var(--text); }
   .result-summary strong { color: var(--red); }
-  .result-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+  .result-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
   .btn-consult {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     padding: 14px 24px; border-radius: 8px;
@@ -436,15 +442,6 @@
       <p id="res-summary">—</p>
     </div>
 
-    <div class="tips-grid">
-      <div class="tip-card"><div class="tip-title">🔍 Check the sender domain</div>Hover the sender name to see the real address. Attackers use paypa1.com, amazon-security.net, and lookalike domains.</div>
-      <div class="tip-card"><div class="tip-title">🔗 Inspect links before clicking</div>Hover over any link to see the real URL in your status bar. Display text and destination can be completely different.</div>
-      <div class="tip-card"><div class="tip-title">⚡ Be suspicious of urgency</div>"Your account will be suspended in 24 hours!" is a manipulation tactic designed to make you act before you think.</div>
-      <div class="tip-card"><div class="tip-title">📧 Go direct, not through email</div>Never click email links to log in. Open a browser and navigate directly to the site instead.</div>
-      <div class="tip-card"><div class="tip-title">🏢 Verify unusual requests</div>A CEO asking for a wire transfer? Call them on a known number to confirm — never rely on email alone.</div>
-      <div class="tip-card"><div class="tip-title">🔤 Watch for subdomain tricks</div>accounts.google.com.evil.net is owned by evil.net, not Google. The real domain is always the last segment before the path.</div>
-    </div>
-
     <div class="result-actions">
       <a class="btn-consult" href="https://calendar.app.google/JfBMnNyijGnE4WUW8" target="_blank">
         📅 Book a Free Consultation
@@ -453,6 +450,18 @@
         🏠 Visit uyazi.co
       </a>
       <button class="restart-btn" onclick="restartGame()">↺ Run Again</button>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-heading">6 Things to Check in Every Email</div>
+      <div class="tips-grid">
+        <div class="tip-card"><div class="tip-title">🔍 Check the sender domain</div>Hover the sender name to see the real address. Attackers use paypa1.com, amazon-security.net, and lookalike domains.</div>
+        <div class="tip-card"><div class="tip-title">🔗 Inspect links before clicking</div>Hover over any link to see the real URL in your status bar. Display text and destination can be completely different.</div>
+        <div class="tip-card"><div class="tip-title">⚡ Be suspicious of urgency</div>"Your account will be suspended in 24 hours!" is a manipulation tactic designed to make you act before you think.</div>
+        <div class="tip-card"><div class="tip-title">📧 Go direct, not through email</div>Never click email links to log in. Open a browser and navigate directly to the site instead.</div>
+        <div class="tip-card"><div class="tip-title">🏢 Verify unusual requests</div>A CEO asking for a wire transfer? Call them on a known number to confirm — never rely on email alone.</div>
+        <div class="tip-card"><div class="tip-title">🔤 Watch for subdomain tricks</div>accounts.google.com.evil.net is owned by evil.net, not Google. The real domain is always the last segment before the path.</div>
+      </div>
     </div>
   </div>
 
