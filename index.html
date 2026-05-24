@@ -690,13 +690,13 @@ function showResults() {
   const total = emails.length;
   let summary;
   if (pct >= .85) {
-    summary = `You correctly identified <strong>${correctCount} out of ${total}</strong> emails — an excellent result. You clearly know what to look for. That said, phishing tactics evolve constantly, and even the most security-aware professionals stay vigilant. Keep that critical eye sharp, and consider sharing this drill with your team.`;
+    summary = `You spotted what most miss — but attackers only need one bad day. Stay sharp, share this with your team, and don't let your guard down. uYazi is watching what you might not.`;
   } else if (pct >= .65) {
-    summary = `You got <strong>${correctCount} out of ${total}</strong> correct — a solid showing. You caught the obvious ones and some of the trickier attacks too. A few slipped through, which is completely normal. Phishing emails are professionally crafted to deceive. Regular practice and a security awareness program for your team can close those gaps quickly.`;
+    summary = `Good instincts — but the gaps you missed? Attackers already mapped them. One click is all it takes to unravel everything. Let's close those cracks before someone else walks through them.`;
   } else if (pct >= .4) {
-    summary = `You identified <strong>${correctCount} out of ${total}</strong> emails correctly. Some of these were genuinely tricky, but there's real room to sharpen your defences. Attackers are counting on people being busy and trusting — awareness training is the single most effective way to reduce that risk for you and your organisation.`;
+    summary = `Some caught you. In the real world, that's a breach, a ransom demand, or worse. The window to fix this is open right now — training is faster and cheaper than the alternative. Let's move.`;
   } else {
-    summary = `You got <strong>${correctCount} out of ${total}</strong> correct this time. Don't be discouraged — these attacks are designed by professionals to fool people, and they work. The important thing is that you're here, testing yourself. A focused security awareness session could dramatically reduce your organisation's exposure to phishing. Let's talk.`;
+    summary = `These attacks are engineered by professionals to fool professionals — and right now, they're winning. This isn't judgment, it's a warning with perfect timing. uYazi knows exactly what's coming for your business. Let's talk before it does.`;
   }
   document.getElementById('res-summary').innerHTML = summary;
 }
