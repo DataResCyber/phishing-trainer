@@ -239,7 +239,7 @@
   .grade-b { background: #eaf1fd; color: #1a4a8a; border: 1px solid #b8cef0; }
   .grade-c { background: var(--warn-bg); color: var(--warn); border: 1px solid #f0d898; }
   .grade-d { background: var(--danger-bg); color: var(--danger); border: 1px solid #e8b8b8; }
-  .tips-section { margin-top: 36px; text-align: left; }
+  .tips-section { margin-top: 36px; margin-bottom: 20px; text-align: left; }
   .tips-heading {
     font-size: 1rem; font-weight: 700; color: var(--text);
     margin-bottom: 14px; padding-bottom: 10px;
@@ -449,7 +449,6 @@
       <a class="btn-home" href="https://uyazi.co" target="_blank">
         🏠 Visit uyazi.co
       </a>
-      <button class="restart-btn" onclick="restartGame()">↺ Run Again</button>
     </div>
 
     <div class="tips-section">
@@ -463,6 +462,8 @@
         <div class="tip-card"><div class="tip-title">🔤 Watch for subdomain tricks</div>accounts.google.com.evil.net is owned by evil.net, not Google. The real domain is always the last segment before the path.</div>
       </div>
     </div>
+
+    <button class="restart-btn" onclick="restartGame()">↺ Run Again</button>
   </div>
 
 </div>
